@@ -7,5 +7,5 @@ This a console command line file encrypter using [Advanced Encryption Standard](
 - Encrypting a folder: --encrypt C:\folder\path
 - Decrypting a folder: --decrypt C:\folder\path
 
-## Versions & Executable
-All the versions and executable download are in [Releases](https://github.com/xSmoking/aesencryption/releases/)
+## Versions & Executables
+All the versions and executables download are in [Releases](https://github.com/xSmoking/aesencryption/releases/)
