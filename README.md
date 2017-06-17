@@ -7,11 +7,5 @@ This a console command line file encrypter using [Advanced Encryption Standard](
 - Encrypting a folder: --encrypt C:\folder\path
 - Decrypting a folder: --decrypt C:\folder\path
 
-## version 0.0.1
-- Create your own key
-- Generate a random key of 16, 32, 64 bytes
-- Encrypt files in a folder
-- AES KeySize is fixed (256 Bit)
-- AES BlockSize is fixed (256 Bit)
-- Cipher Mode is set to [Cipher Feedback](https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Cipher_Feedback_.28CFB.29)
-- Decrypt files in a folder
+## Versions & Executables
+All the versions and executables download are in [Releases](https://github.com/xSmoking/aesencryption/releases/)
