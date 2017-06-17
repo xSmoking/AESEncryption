@@ -1,9 +1,12 @@
-# AES Encryption [v0.0.1]
+# AES Encryption
+Current Version: 0.0.2
+
 This a console command line file encrypter using [Advanced Encryption Standard](https://en.wikipedia.org/wiki/Advanced_Encryption_Standard)
 
 ## How to use
-- Creating a custom key: --create --key your_key
-- Creating 128/256/512 Bit key: --create --key128/256/512
+- Setting a custom key: --set --key your_key
+- Setting 128/256/512 Bit key: --set --key128/256/512
+- Setting the BlockSize: --set --block 128/192/256
 - Encrypting a folder: --encrypt C:\folder\path
 - Decrypting a folder: --decrypt C:\folder\path
 
