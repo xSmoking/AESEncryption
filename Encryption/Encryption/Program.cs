@@ -24,7 +24,7 @@ namespace Encryption
             return data;
         }
 
-        private static void AES_Encrypt(string inputFile, string password)
+        private static void AES_Encrypt(string inputFile, string password, int blockSize = 128)
         {
             byte[] salt = GenerateRandomSalt();
             byte[] passwordBytes = System.Text.Encoding.UTF8.GetBytes(password);
@@ -32,7 +32,7 @@ namespace Encryption
             
             RijndaelManaged AES = new RijndaelManaged();
             AES.KeySize = 256;
-            AES.BlockSize = 256;
+            AES.BlockSize = blockSize;
             AES.Padding = PaddingMode.PKCS7;
             
             var key = new Rfc2898DeriveBytes(passwordBytes, salt, 50000);
@@ -70,7 +70,7 @@ namespace Encryption
             }
         }
 
-        static void AES_Decrypt(string inputFile, string password)
+        static void AES_Decrypt(string inputFile, string password, int blockSize = 128)
         {
             byte[] passwordBytes = System.Text.Encoding.UTF8.GetBytes(password);
             byte[] salt = new byte[32];
@@ -80,7 +80,7 @@ namespace Encryption
 
             RijndaelManaged AES = new RijndaelManaged();
             AES.KeySize = 256;
-            AES.BlockSize = 256;
+            AES.BlockSize = blockSize;
             var key = new Rfc2898DeriveBytes(passwordBytes, salt, 50000);
             AES.Key = key.GetBytes(AES.KeySize / 8);
             AES.IV = key.GetBytes(AES.BlockSize / 8);
@@ -207,19 +207,28 @@ namespace Encryption
             string username = System.Security.Principal.WindowsIdentity.GetCurrent().Name;
             Console.ForegroundColor = ConsoleColor.White;
             string key = string.Empty;
+            int blockSize = 0;
 
-            Console.WriteLine("PDU Cryptography_AES 256 Bit [version 0.0.1]\n");
+            Console.WriteLine();
+            Console.WriteLine("==================== AES Encryption ====================");
+            Console.WriteLine("               AES File Encryptor v0.0.2");
+            Console.WriteLine("               BlockSizes: 128, 192, 256");
+            Console.WriteLine("                 Developed by xSmoking");
+            Console.WriteLine("       BitCoin: 17s6D2prtrB4iT8TCSFZZVgfBQZNcB7PVV");
+            Console.WriteLine("========================================================\n");
             Console.WriteLine("Enumeration:");
-            Console.WriteLine("    -c, --create\tCreate a new key for encryption");
+            Console.WriteLine("    --set\t\tSet the key or block size for encryption");
             Console.WriteLine("    --key128\t\tGenerate a secure hash of 16 bytes (128 Bit)");
             Console.WriteLine("    --key256\t\tGenerate a secure hash of 32 bytes (256 Bit)");
             Console.WriteLine("    --key512\t\tGenerate a secure hash of 64 bytes (512 Bit)");
+            Console.WriteLine("    --block\t\tSet the block size (128, 192, 256)");
             Console.WriteLine("    -k, --key\t\tUse your own key");
             Console.WriteLine("    -e, --encrypt\tEncrypt a folder/file");
             Console.WriteLine("    -d, --decrypt\tDecrypt a folder/file");
             Console.WriteLine("    --exit\t\tExit the program\n");
             Console.WriteLine("Examples:");
-            Console.WriteLine("    --create --key128");
+            Console.WriteLine("    --set --key128");
+            Console.WriteLine("    --set --block 256");
             Console.WriteLine("    --encrypt C:\\Users\\PDU\\Documents\\");
             Console.WriteLine("    -d C:\\Users\\PDU\\Documents\\\n");
 
@@ -232,7 +241,7 @@ namespace Encryption
                 {
                     List<string> commandList = new List<string>(input.Split(' '));
 
-                    if (commandList[0] == "-c" || commandList[0] == "--create")
+                    if (commandList[0] == "--set")
                     {
                         if (commandList.Count > 1)
                         {
@@ -261,6 +270,23 @@ namespace Encryption
                                     ConsoleLog(LogType.Error, "Missing commands or parameters\n");
                                 }
                             }
+                            else if (commandList[1] == "--block")
+                            {
+                                valid = false;
+                                if (commandList.Count > 2)
+                                {
+                                    if (commandList[2] == "128")
+                                        blockSize = 128;
+                                    else if (commandList[2] == "192")
+                                        blockSize = 192;
+                                    else if (commandList[2] == "256")
+                                        blockSize = 256;
+                                    else
+                                        ConsoleLog(LogType.Error, "'" + commandList[2] + "' is not a valid block size\n");
+                                }
+                                else
+                                    ConsoleLog(LogType.Error, "Missing commands or parameters\n");
+                            }
                             else
                             {
                                 valid = false;
@@ -282,23 +308,40 @@ namespace Encryption
                         {
                             if (commandList.Count > 1)
                             {
-                                if (Directory.Exists(commandList[1]))
+                                bool keepGoing = true;
+                                if (blockSize == 0)
                                 {
-                                    foreach (string file in Directory.EnumerateFiles(commandList[1]))
+                                    Console.Write("BlockSize not set. Wanna proceed with the default (128 Bit)? [y/n]>");
+                                    string option = Console.ReadLine();
+                                    if (option == "Y" || option == "y")
+                                        blockSize = 128;
+                                    else
                                     {
-                                        Console.Write("Encrypting " + file + " - result: ");
-                                        AES_Encrypt(file, key);
+                                        ConsoleLog(LogType.Info, "Operation aborted by user\n");
+                                        keepGoing = false;
                                     }
-                                    Console.WriteLine();
                                 }
-                                else
-                                    ConsoleLog(LogType.Error, "'" + commandList[1] + "' is not a valid path\n");
+
+                                if (keepGoing)
+                                {
+                                    if (Directory.Exists(commandList[1]))
+                                    {
+                                        foreach (string file in Directory.EnumerateFiles(commandList[1]))
+                                        {
+                                            Console.Write("Encrypting " + file + " - result: ");
+                                            AES_Encrypt(file, key, blockSize);
+                                        }
+                                        Console.WriteLine();
+                                    }
+                                    else
+                                        ConsoleLog(LogType.Error, "'" + commandList[1] + "' is not a valid path\n");
+                                }
                             }
                             else
                                 ConsoleLog(LogType.Error, "Missing commands or parameters\n");
                         }
                         else
-                            ConsoleLog(LogType.Error, "You do not have a key assigned, create a key first\n");
+                            ConsoleLog(LogType.Error, "You do not have any key assigned, set the key first\n");
                     }
                     else if (commandList[0] == "-d" || commandList[0] == "--decrypt")
                     {
@@ -306,23 +349,40 @@ namespace Encryption
                         {
                             if (commandList.Count > 1)
                             {
-                                if (Directory.Exists(commandList[1]))
+                                bool keepGoing = true;
+                                if (blockSize == 0)
                                 {
-                                    foreach (string file in Directory.EnumerateFiles(commandList[1], "*.aes"))
+                                    Console.Write("BlockSize not set. Wanna proceed with the default (128 Bit)? [y/n]>");
+                                    string option = Console.ReadLine();
+                                    if (option == "Y" || option == "y")
+                                        blockSize = 128;
+                                    else
                                     {
-                                        Console.Write("Decrypting " + file + " - result: ");
-                                        AES_Decrypt(file, key);
+                                        ConsoleLog(LogType.Info, "Operation aborted by user\n");
+                                        keepGoing = false;
                                     }
-                                    Console.WriteLine();
                                 }
-                                else
-                                    ConsoleLog(LogType.Error, "'" + commandList[1] + "' is not a valid path\n");
+
+                                if (keepGoing)
+                                {
+                                    if (Directory.Exists(commandList[1]))
+                                    {
+                                        foreach (string file in Directory.EnumerateFiles(commandList[1], "*.aes"))
+                                        {
+                                            Console.Write("Decrypting " + file + " - result: ");
+                                            AES_Decrypt(file, key);
+                                        }
+                                        Console.WriteLine();
+                                    }
+                                    else
+                                        ConsoleLog(LogType.Error, "'" + commandList[1] + "' is not a valid path\n");
+                                }
                             }
                             else
                                 ConsoleLog(LogType.Error, "Missing commands or parameters\n");
                         }
                         else
-                            ConsoleLog(LogType.Error, "You do not have a key assigned, create a key first\n");
+                            ConsoleLog(LogType.Error, "You do not have any key assigned, set the key first\n");
                     }
                     else
                         ConsoleLog(LogType.Error, "'" + commandList[0] + "' is not a command\n");
