@@ -384,6 +384,8 @@ namespace Encryption
                         else
                             ConsoleLog(LogType.Error, "You do not have any key assigned, set the key first\n");
                     }
+                    else if (commandList[0] == "--exit")
+                        break;
                     else
                         ConsoleLog(LogType.Error, "'" + commandList[0] + "' is not a command\n");
                 }
