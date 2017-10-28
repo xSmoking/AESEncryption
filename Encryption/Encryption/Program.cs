@@ -211,12 +211,14 @@ namespace Encryption
 
             Console.WriteLine();
             Console.WriteLine("==================== AES Encryption ====================");
-            Console.WriteLine("               AES File Encryptor v0.0.2");
+            Console.WriteLine("               AES File Encryptor v1.0.0");
             Console.WriteLine("               BlockSizes: 128, 192, 256");
             Console.WriteLine("                 Developed by xSmoking");
             Console.WriteLine("       BitCoin: 17s6D2prtrB4iT8TCSFZZVgfBQZNcB7PVV");
             Console.WriteLine("========================================================\n");
             Console.WriteLine("Enumeration:");
+            Console.WriteLine("    These options can be used to change the back-end settings before encrypting your files.");
+            Console.WriteLine("");
             Console.WriteLine("    --set\t\tSet the key or block size for encryption");
             Console.WriteLine("    --key128\t\tGenerate a secure hash of 16 bytes (128 Bit)");
             Console.WriteLine("    --key256\t\tGenerate a secure hash of 32 bytes (256 Bit)");
@@ -229,6 +231,7 @@ namespace Encryption
             Console.WriteLine("Examples:");
             Console.WriteLine("    --set --key128");
             Console.WriteLine("    --set --block 256");
+            Console.WriteLine("    --set --autodelete true");
             Console.WriteLine("    --encrypt C:\\Users\\PDU\\Documents\\");
             Console.WriteLine("    -d C:\\Users\\PDU\\Documents\\\n");
 
@@ -324,17 +327,38 @@ namespace Encryption
 
                                 if (keepGoing)
                                 {
-                                    if (Directory.Exists(commandList[1]))
+                                    // Detect whether its a directory or a file
+                                    FileAttributes attr = new FileAttributes();
+                                    if (File.Exists(commandList[1]) || Directory.Exists(commandList[1]))
+                                        attr = File.GetAttributes(@commandList[1]);
+
+                                    // if its a directory
+                                    if (attr.HasFlag(FileAttributes.Directory))
                                     {
-                                        foreach (string file in Directory.EnumerateFiles(commandList[1]))
+                                        if (Directory.Exists(commandList[1]))
                                         {
-                                            Console.Write("Encrypting " + file + " - result: ");
-                                            AES_Encrypt(file, key, blockSize);
+                                            foreach (string file in Directory.EnumerateFiles(commandList[1]))
+                                            {
+                                                Console.Write("Encrypting " + file + " - result: ");
+                                                AES_Encrypt(file, key, blockSize);
+                                            }
+                                            Console.WriteLine();
                                         }
-                                        Console.WriteLine();
+                                        else
+                                            ConsoleLog(LogType.Error, "'" + commandList[1] + "' is not a valid path\n");
                                     }
+                                    // if its a file
                                     else
-                                        ConsoleLog(LogType.Error, "'" + commandList[1] + "' is not a valid path\n");
+                                    {
+                                        if (File.Exists(commandList[1]))
+                                        {
+                                            Console.Write("Encrypting " + commandList[1] + " - result: ");
+                                            AES_Encrypt(commandList[1], key, blockSize);
+                                            Console.WriteLine();
+                                        }
+                                        else
+                                            ConsoleLog(LogType.Error, "'" + commandList[1] + "' is not a valid file\n");
+                                    }
                                 }
                             }
                             else
@@ -365,17 +389,38 @@ namespace Encryption
 
                                 if (keepGoing)
                                 {
-                                    if (Directory.Exists(commandList[1]))
+                                    // Detect whether its a directory or a file
+                                    FileAttributes attr = new FileAttributes();
+                                    if (File.Exists(commandList[1]) || Directory.Exists(commandList[1]))
+                                        attr = File.GetAttributes(@commandList[1]);
+
+                                    // if its a directory
+                                    if (attr.HasFlag(FileAttributes.Directory))
                                     {
-                                        foreach (string file in Directory.EnumerateFiles(commandList[1], "*.aes"))
+                                        if (Directory.Exists(commandList[1]))
                                         {
-                                            Console.Write("Decrypting " + file + " - result: ");
-                                            AES_Decrypt(file, key);
+                                            foreach (string file in Directory.EnumerateFiles(commandList[1], "*.aes"))
+                                            {
+                                                Console.Write("Decrypting " + file + " - result: ");
+                                                AES_Decrypt(file, key, blockSize);
+                                            }
+                                            Console.WriteLine();
                                         }
-                                        Console.WriteLine();
+                                        else
+                                            ConsoleLog(LogType.Error, "'" + commandList[1] + "' is not a valid path\n");
                                     }
+                                    // if its a file
                                     else
-                                        ConsoleLog(LogType.Error, "'" + commandList[1] + "' is not a valid path\n");
+                                    {
+                                        if (File.Exists(commandList[1]))
+                                        {
+                                            Console.Write("Decrypting " + commandList[1] + " - result: ");
+                                            AES_Decrypt(commandList[1], key, blockSize);
+                                            Console.WriteLine();
+                                        }
+                                        else
+                                            ConsoleLog(LogType.Error, "'" + commandList[1] + "' is not a valid file\n");
+                                    }
                                 }
                             }
                             else
