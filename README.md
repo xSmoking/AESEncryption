@@ -1,5 +1,5 @@
 # AES Encryption
-Current Version: 0.0.2
+Current Version: 1.0.0
 
 This a console command line file encrypter using [Advanced Encryption Standard](https://en.wikipedia.org/wiki/Advanced_Encryption_Standard)
 
